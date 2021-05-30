@@ -1,6 +1,7 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("./models/user");
+const Campsite = require("./models/campsite");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const jwt = require("jsonwebtoken");
@@ -45,4 +46,21 @@ exports.verifyAdmin = (req, res, next) => {
     res.statusCode = 403;
     next(err);
   }
+};
+exports.identifyAuthor = (req, res, next) => {
+  Campsite.findById({ _id: req.params.campsiteId })
+    .then((campsite) => {
+      if (campsite && campsite.comments.id(req.params.commentId)) {
+        const comment = campsite.comments.id(req.params.commentId);
+        if (comment && comment.author === req.user._id) {
+          res.statusCode = 200;
+          next();
+        }
+      } else {
+        const err = new Error("No comment/campsite found.");
+        res.statusCode = 403;
+        next(err);
+      }
+    })
+    .catch((err) => next(err));
 };

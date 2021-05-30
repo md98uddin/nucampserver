@@ -35,3 +35,14 @@ exports.jwtPassport = passport.use(
 );
 
 exports.verifyUser = passport.authenticate("jwt", { session: false });
+exports.verifyAdmin = (req, res, next) => {
+  if (req.user.admin) {
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "plain/text");
+    next();
+  } else {
+    const err = new Error("You are not authorized to enter!");
+    res.statusCode = 403;
+    next(err);
+  }
+};

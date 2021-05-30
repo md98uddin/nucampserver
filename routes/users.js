@@ -5,12 +5,22 @@ const authenticate = require("../authenticate");
 const router = express.Router();
 
 /* GET users listing. */
-// router.get("/", authenticate.verifyAdmin, function (req, res, next) {
-//   res.statusCode = 200;
-//   res.setHeader("Content-Type", "application/json");
-//   res.json({ success: true, users: User.find() });
-//   next();
-// });
+router.get(
+  "/",
+  authenticate.verifyUser,
+  authenticate.verifyAdmin,
+  (req, res, next) => {
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    User.find().then((users) => {
+      if (users) {
+        return res.json({ users });
+      } else {
+        next(new Error("No users found"));
+      }
+    });
+  }
+);
 
 router.post("/signup", (req, res) => {
   User.register(
